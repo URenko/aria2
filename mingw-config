@@ -36,7 +36,6 @@
 # can be adjusted to change build settings:
 #
 # HOST: cross-compile to build programs to run on HOST. It defaults to
-#       i686-w64-mingw32. To build 64 bit binary, specify
 #       x86_64-w64-mingw32.
 #
 # PREFIX: Prefix to the directory where dependent libraries are
@@ -55,7 +54,7 @@
 # * libssh2
 # * cppunit
 
-test -z "$HOST" && HOST=i686-w64-mingw32
+test -z "$HOST" && HOST=x86_64-w64-mingw32
 test -z "$PREFIX" && PREFIX=/usr/local/$HOST
 
 ./configure \
@@ -63,18 +62,19 @@ test -z "$PREFIX" && PREFIX=/usr/local/$HOST
     --prefix=$PREFIX \
     --without-included-gettext \
     --disable-nls \
-    --with-libcares \
+    --without-libcares \
     --without-gnutls \
     --without-openssl \
-    --with-sqlite3 \
+    --without-sqlite3 \
     --without-libxml2 \
-    --with-libexpat \
+    --without-libexpat \
     --with-libz \
     --with-libgmp \
-    --with-libssh2 \
+    --without-libssh2 \
     --without-libgcrypt \
     --without-libnettle \
     --with-cppunit-prefix=$PREFIX \
+    --disable-metalink \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
     LDFLAGS="-L$PREFIX/lib" \
