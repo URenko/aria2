@@ -66,6 +66,8 @@
 #  include "SSHSession.h"
 #endif // HAVE_LIBSSH2
 
+char BT_IPv6[NI_MAXHOST];
+
 namespace aria2 {
 
 #ifndef __MINGW32__
@@ -252,6 +254,8 @@ static sock_t bindInternal(int family, int socktype, int protocol,
 
   applySocketBufferSize(fd);
 
+  char addr_buffer[NI_MAXHOST];
+  inetNtop(family, &addr, addr_buffer, NI_MAXHOST);
   if (::bind(fd, addr, addrlen) == -1) {
     errNum = SOCKET_ERRNO;
     error = errorMsg(errNum);
@@ -1645,6 +1649,9 @@ void checkAddrconfig()
       if (rv == 0) {
         if (found) {
           A2_LOG_INFO(fmt("Found configured address: %s", host));
+          if (i->Address.iSockaddrLength == sizeof(sockaddr_in6)){
+            strcpy(BT_IPv6, host);
+          }
         }
         else {
           A2_LOG_INFO(fmt("Not considered: %s", host));

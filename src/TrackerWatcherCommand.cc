@@ -364,6 +364,7 @@ TrackerWatcherCommand::createHTTPAnnRequest(const std::string& uri)
   std::vector<std::string> uris;
   uris.push_back(uri);
   auto option = util::copy(getOption());
+  option->put(PREF_USER_AGENT, option->get(PREF_PEER_AGENT));
   auto rg = make_unique<RequestGroup>(GroupId::create(), option);
   if (backupTrackerIsAvailable(requestGroup_->getDownloadContext())) {
     A2_LOG_DEBUG("This is multi-tracker announce.");

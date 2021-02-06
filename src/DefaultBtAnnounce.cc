@@ -55,6 +55,8 @@
 #include "UDPTrackerRequest.h"
 #include "SocketCore.h"
 
+extern char BT_IPv6[];
+
 namespace aria2 {
 
 DefaultBtAnnounce::DefaultBtAnnounce(DownloadContext* downloadContext,
@@ -163,26 +165,28 @@ std::string DefaultBtAnnounce::getAnnounceUrl()
   uri += uriHasQuery(uri) ? "&" : "?";
   uri +=
       fmt("info_hash=%s&"
-          "peer_id=%s&"
-          "uploaded=%" PRId64 "&"
-          "downloaded=%" PRId64 "&"
-          "left=%" PRId64 "&"
-          "compact=1&"
-          "key=%s&"
-          "numwant=%d&"
-          "no_peer_id=1",
+          "peer_id=%s",
           util::percentEncode(bittorrent::getInfoHash(downloadContext_),
                               INFO_HASH_LENGTH)
               .c_str(),
           util::percentEncode(bittorrent::getStaticPeerId(), PEER_ID_LENGTH)
-              .c_str(),
-          stat.getSessionUploadLength(), stat.getSessionDownloadLength(), left,
-          util::percentEncode(
-              bittorrent::getStaticPeerId() + PEER_ID_LENGTH - keyLen, keyLen)
-              .c_str(),
-          numWant);
+              .c_str() );
   if (tcpPort_) {
     uri += fmt("&port=%u", tcpPort_);
+  }
+  uri += fmt(
+          "&uploaded=%" PRId64 "&"
+          "downloaded=%" PRId64 "&"
+          "left=%" PRId64 "&"
+          "numwant=%d&"
+          "key=%s&"
+          "compact=1&"
+          "supportcrypto=1",
+          stat.getSessionUploadLength(), stat.getSessionDownloadLength(), left,
+          numWant, "32b7e947");
+  if (option_->getAsBool(PREF_BT_FORCE_ENCRYPTION) ||
+      option_->getAsBool(PREF_BT_REQUIRE_CRYPTO)) {
+    uri += "&requirecrypto=1";
   }
   const char* event = announceList_.getEventString();
   if (event[0]) {
@@ -193,16 +197,12 @@ std::string DefaultBtAnnounce::getAnnounceUrl()
     uri += "&trackerid=";
     uri += util::percentEncode(trackerId_);
   }
-  if (option_->getAsBool(PREF_BT_FORCE_ENCRYPTION) ||
-      option_->getAsBool(PREF_BT_REQUIRE_CRYPTO)) {
-    uri += "&requirecrypto=1";
-  }
-  else {
-    uri += "&supportcrypto=1";
-  }
   if (!option_->blank(PREF_BT_EXTERNAL_IP)) {
     uri += "&ip=";
     uri += option_->get(PREF_BT_EXTERNAL_IP);
+  }
+  if (BT_IPv6[0]=='2'){
+    uri += fmt("&ipv6=%s", util::percentEncode(reinterpret_cast<const unsigned char *>(BT_IPv6), strlen(BT_IPv6)).c_str());
   }
   return uri;
 }

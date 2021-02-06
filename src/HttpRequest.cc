@@ -68,7 +68,7 @@ HttpRequest::HttpRequest()
       acceptMetalink_(false),
       noCache_(true),
       acceptGzip_(false),
-      noWantDigest_(false)
+      noWantDigest_(true)
 {
 }
 
@@ -168,6 +168,7 @@ std::string HttpRequest::createRequest()
 
   std::vector<std::pair<std::string, std::string>> builtinHds;
   builtinHds.reserve(20);
+  builtinHds.emplace_back("Host:", getHostText(getURIHost(), getPort()));
   builtinHds.emplace_back("User-Agent:", userAgent_);
   std::string acceptTypes = "*/*";
   if (acceptMetalink_) {
@@ -190,7 +191,6 @@ std::string HttpRequest::createRequest()
       builtinHds.emplace_back("Accept-Encoding:", acceptableEncodings);
     }
   }
-  builtinHds.emplace_back("Host:", getHostText(getURIHost(), getPort()));
   if (noCache_) {
     builtinHds.emplace_back("Pragma:", "no-cache");
     builtinHds.emplace_back("Cache-Control:", "no-cache");
